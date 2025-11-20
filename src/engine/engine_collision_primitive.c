@@ -93,6 +93,7 @@ int mjc_PlaneCylinder(const mjModel* m, const mjData* d,
   mjGETINFO
   mjtNum normal[3] = {mat1[2], mat1[5], mat1[8]};
   mjtNum axis[3] = {mat2[2], mat2[5], mat2[8]};
+  mjtNum original_axis[3] = {mat2[2], mat2[5], mat2[8]};
 
   // project, make sure axis points towards plane
   mjtNum prjaxis = mju_dot3(normal, axis);
@@ -140,7 +141,7 @@ int mjc_PlaneCylinder(const mjModel* m, const mjData* d,
     mju_addTo3(con[cnt].pos, axis);
     mju_addToScl3(con[cnt].pos, normal, -con[cnt].dist*0.5);
     mju_copy3(con[cnt].frame, normal);
-    mju_zero3(con[cnt].frame+3);
+    mju_copy3(con[cnt].frame+3, original_axis);
     cnt++;
   } else {
     return 0;  // nearest point is above margin: no contacts
@@ -153,7 +154,7 @@ int mjc_PlaneCylinder(const mjModel* m, const mjData* d,
     mju_subFrom3(con[cnt].pos, axis);
     mju_addToScl3(con[cnt].pos, normal, -con[cnt].dist*0.5);
     mju_copy3(con[cnt].frame, normal);
-    mju_zero3(con[cnt].frame+3);
+    mju_copy3(con[cnt].frame+3, original_axis);
     cnt++;
   }
 
@@ -173,7 +174,7 @@ int mjc_PlaneCylinder(const mjModel* m, const mjData* d,
     mju_addToScl3(con[cnt].pos, vec, -0.5);
     mju_addToScl3(con[cnt].pos, normal, -con[cnt].dist*0.5);
     mju_copy3(con[cnt].frame, normal);
-    mju_zero3(con[cnt].frame+3);
+    mju_copy3(con[cnt].frame+3, original_axis);
     cnt++;
 
     // add point B
@@ -183,7 +184,7 @@ int mjc_PlaneCylinder(const mjModel* m, const mjData* d,
     mju_addToScl3(con[cnt].pos, vec, -0.5);
     mju_addToScl3(con[cnt].pos, normal, -con[cnt].dist*0.5);
     mju_copy3(con[cnt].frame, normal);
-    mju_zero3(con[cnt].frame+3);
+    mju_copy3(con[cnt].frame+3, original_axis);
     cnt++;
   }
 
