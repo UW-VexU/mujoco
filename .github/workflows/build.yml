@@ -1,175 +1,175 @@
-# This configuration is used to build and test on GitHub Actions only.
-# It is not the same configuration that is used by Google DeepMind to create release binaries.
-# The "official" binaries are built with Clang 13 on all platforms, and are linked against libc++
-# on Linux.
-#
-# We set CMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF here to reduce build time.
-# It is highly recommended that this is set to ON for production builds.
+# # This configuration is used to build and test on GitHub Actions only.
+# # It is not the same configuration that is used by Google DeepMind to create release binaries.
+# # The "official" binaries are built with Clang 13 on all platforms, and are linked against libc++
+# # on Linux.
+# #
+# # We set CMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF here to reduce build time.
+# # It is highly recommended that this is set to ON for production builds.
 
-# TODO(matijak): Consider switching Windows to Ninja builds only, this configures slightly faster
-# and brings Windows in line with other OSes. Also we wouldn't need to specify the --config option
-# in the build step because Ninja doesn't support multiple configurations (unlike MSBuild).
+# # TODO(matijak): Consider switching Windows to Ninja builds only, this configures slightly faster
+# # and brings Windows in line with other OSes. Also we wouldn't need to specify the --config option
+# # in the build step because Ninja doesn't support multiple configurations (unlike MSBuild).
 
-name: build
+# name: build
 
-on:
-  workflow_dispatch:
-    inputs:
-      example_input:
-        description: 'An example input for the workflow dispatch'
-        required: false
-        default: 'default value'
-  push:
-    paths-ignore:
-      - "doc/**"
-      - "**/README.md"
-  pull_request:
-    paths-ignore:
-      - "doc/**"
-      - "**/README.md"
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       example_input:
+#         description: 'An example input for the workflow dispatch'
+#         required: false
+#         default: 'default value'
+#   push:
+#     paths-ignore:
+#       - "doc/**"
+#       - "**/README.md"
+#   pull_request:
+#     paths-ignore:
+#       - "doc/**"
+#       - "**/README.md"
 
-jobs:
-  mujoco:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-24.04
-            label: "ubuntu-24.04-gcc-14"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=gcc-14
-              -DCMAKE_CXX_COMPILER:STRING=g++-14
-              -DCMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--no-as-needed
-            tmpdir: "/tmp"
-          - os: ubuntu-24.04
-            label: "ubuntu-24.04-clang-18"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=clang-18
-              -DCMAKE_CXX_COMPILER:STRING=clang++-18
-              -DMUJOCO_HARDEN:BOOL=ON
-            tmpdir: "/tmp"
-          - os: macos-15
-            label: "macos-15-arm64"
-            cmake_args: >-
-              -G Ninja
-              -DMUJOCO_HARDEN:BOOL=ON
-            tmpdir: "/tmp"
-          - os: windows-2025
-            label: "windows-2025"
-            cmake_args: >-
-              -DCMAKE_SYSTEM_VERSION="10.0.26100.0"
-            cmake_build_args: "-- -m"
-            tmpdir: "C:/Temp"
+# jobs:
+#   mujoco:
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         include:
+#           - os: ubuntu-24.04
+#             label: "ubuntu-24.04-gcc-14"
+#             cmake_args: >-
+#               -G Ninja
+#               -DCMAKE_C_COMPILER:STRING=gcc-14
+#               -DCMAKE_CXX_COMPILER:STRING=g++-14
+#               -DCMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--no-as-needed
+#             tmpdir: "/tmp"
+#           - os: ubuntu-24.04
+#             label: "ubuntu-24.04-clang-18"
+#             cmake_args: >-
+#               -G Ninja
+#               -DCMAKE_C_COMPILER:STRING=clang-18
+#               -DCMAKE_CXX_COMPILER:STRING=clang++-18
+#               -DMUJOCO_HARDEN:BOOL=ON
+#             tmpdir: "/tmp"
+#           - os: macos-15
+#             label: "macos-15-arm64"
+#             cmake_args: >-
+#               -G Ninja
+#               -DMUJOCO_HARDEN:BOOL=ON
+#             tmpdir: "/tmp"
+#           - os: windows-2025
+#             label: "windows-2025"
+#             cmake_args: >-
+#               -DCMAKE_SYSTEM_VERSION="10.0.26100.0"
+#             cmake_build_args: "-- -m"
+#             tmpdir: "C:/Temp"
 
-    name: "${{ matrix.label }}"
-    runs-on: ${{ matrix.os }}
+#     name: "${{ matrix.label }}"
+#     runs-on: ${{ matrix.os }}
 
-    steps:
-    - uses: actions/checkout@v3
+#     steps:
+#     - uses: actions/checkout@v3
 
-    - name: Prepare Linux
-      if: ${{ runner.os == 'Linux' }}
-      run: bash ./.github/workflows/build_steps.sh prepare_linux
+#     - name: Prepare Linux
+#       if: ${{ runner.os == 'Linux' }}
+#       run: bash ./.github/workflows/build_steps.sh prepare_linux
 
-    - name: Prepare macOS
-      if: ${{ runner.os == 'macOS' }}
-      run: brew install ninja
+#     - name: Prepare macOS
+#       if: ${{ runner.os == 'macOS' }}
+#       run: brew install ninja
 
-    - uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
+#     - uses: actions/setup-python@v4
+#       with:
+#         python-version: "3.11"
 
-    - name: Prepare Python
-      shell: bash
-      env:
-        TMPDIR: ${{ matrix.tmpdir }}
-      run: bash ./.github/workflows/build_steps.sh prepare_python
+#     - name: Prepare Python
+#       shell: bash
+#       env:
+#         TMPDIR: ${{ matrix.tmpdir }}
+#       run: bash ./.github/workflows/build_steps.sh prepare_python
 
-    - name: Configure MuJoCo
-      env:
-        TMPDIR: ${{ matrix.tmpdir }}
-        CMAKE_ARGS: ${{ matrix.cmake_args }}
-      run: bash ./.github/workflows/build_steps.sh configure_mujoco
+#     - name: Configure MuJoCo
+#       env:
+#         TMPDIR: ${{ matrix.tmpdir }}
+#         CMAKE_ARGS: ${{ matrix.cmake_args }}
+#       run: bash ./.github/workflows/build_steps.sh configure_mujoco
 
-    - name: Build MuJoCo
-      working-directory: build
-      env:
-        CMAKE_BUILD_ARGS: ${{ matrix.cmake_build_args }}
-      run: bash ../.github/workflows/build_steps.sh build_mujoco
+#     - name: Build MuJoCo
+#       working-directory: build
+#       env:
+#         CMAKE_BUILD_ARGS: ${{ matrix.cmake_build_args }}
+#       run: bash ../.github/workflows/build_steps.sh build_mujoco
 
-    - name: Copy in the correct VC runtime DLLs (workaround for actions/runner-images#10004)
-      if: ${{ runner.os == 'Windows' }}
-      working-directory: build
-      shell: powershell
-      run: |
-        Copy-Item (Join-Path `
-          ((Get-ChildItem -Directory `
-              -Path "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\14.*" |
-            Sort -Descending | Select-Object -First 1).FullName
-          ) 'x64\Microsoft.VC143.CRT\*.dll') "bin\Release"
+#     - name: Copy in the correct VC runtime DLLs (workaround for actions/runner-images#10004)
+#       if: ${{ runner.os == 'Windows' }}
+#       working-directory: build
+#       shell: powershell
+#       run: |
+#         Copy-Item (Join-Path `
+#           ((Get-ChildItem -Directory `
+#               -Path "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\14.*" |
+#             Sort -Descending | Select-Object -First 1).FullName
+#           ) 'x64\Microsoft.VC143.CRT\*.dll') "bin\Release"
 
-    - name: Install MuJoCo
-      working-directory: build
-      run: bash ../.github/workflows/build_steps.sh install_mujoco
+#     - name: Install MuJoCo
+#       working-directory: build
+#       run: bash ../.github/workflows/build_steps.sh install_mujoco
 
-    - name: Copy plugins (POSIX)
-      if: ${{ runner.os != 'Windows' }}
-      working-directory: build
-      env:
-        TMPDIR: ${{ matrix.tmpdir }}
-      run: bash ../.github/workflows/build_steps.sh copy_plugins_posix
+#     - name: Copy plugins (POSIX)
+#       if: ${{ runner.os != 'Windows' }}
+#       working-directory: build
+#       env:
+#         TMPDIR: ${{ matrix.tmpdir }}
+#       run: bash ../.github/workflows/build_steps.sh copy_plugins_posix
 
-    - name: Copy plugins (Windows)
-      if: ${{ runner.os == 'Windows' }}
-      working-directory: build
-      env:
-        TMPDIR: ${{ matrix.tmpdir }}
-      run: bash ../.github/workflows/build_steps.sh copy_plugins_window
+#     - name: Copy plugins (Windows)
+#       if: ${{ runner.os == 'Windows' }}
+#       working-directory: build
+#       env:
+#         TMPDIR: ${{ matrix.tmpdir }}
+#       run: bash ../.github/workflows/build_steps.sh copy_plugins_window
 
-    - name: Configure simulate
-      working-directory: simulate
-      env:
-        TMPDIR: ${{ matrix.tmpdir }}
-        CMAKE_ARGS: ${{ matrix.cmake_args }}
-      run: bash ../.github/workflows/build_steps.sh configure_simulate
+#     - name: Configure simulate
+#       working-directory: simulate
+#       env:
+#         TMPDIR: ${{ matrix.tmpdir }}
+#         CMAKE_ARGS: ${{ matrix.cmake_args }}
+#       run: bash ../.github/workflows/build_steps.sh configure_simulate
 
-    - name: Build simulate
-      working-directory: simulate/build
-      env:
-        CMAKE_BUILD_ARGS: ${{ matrix.cmake_build_args }}
-      run: bash ../../.github/workflows/build_steps.sh build_simulate
+#     - name: Build simulate
+#       working-directory: simulate/build
+#       env:
+#         CMAKE_BUILD_ARGS: ${{ matrix.cmake_build_args }}
+#       run: bash ../../.github/workflows/build_steps.sh build_simulate
 
-    - name: Make Python sdist
-      shell: bash
-      working-directory: python
-      env:
-        TMPDIR: ${{ matrix.tmpdir }}
-      run: bash ../.github/workflows/build_steps.sh make_python_sdist
+#     - name: Make Python sdist
+#       shell: bash
+#       working-directory: python
+#       env:
+#         TMPDIR: ${{ matrix.tmpdir }}
+#       run: bash ../.github/workflows/build_steps.sh make_python_sdist
 
-    - name: Build Python bindings
-      shell: bash
-      working-directory: python/dist
-      env:
-        TMPDIR: ${{ matrix.tmpdir }}
-        CMAKE_ARGS: ${{ matrix.cmake_args }}
-      run: bash ../../.github/workflows/build_steps.sh build_python_bindings
+#     - name: Build Python bindings
+#       shell: bash
+#       working-directory: python/dist
+#       env:
+#         TMPDIR: ${{ matrix.tmpdir }}
+#         CMAKE_ARGS: ${{ matrix.cmake_args }}
+#       run: bash ../../.github/workflows/build_steps.sh build_python_bindings
 
 
-    - name: Upload Python wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: python-wheels-${{ matrix.label }}
-        path: python/dist/*.whl
-        retention-days: 90
+#     - name: Upload Python wheels
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: python-wheels-${{ matrix.label }}
+#         path: python/dist/*.whl
+#         retention-days: 90
 
-    - name: Upload MuJoCo artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: mujoco-${{ matrix.label }}
-        path: |
-          build/bin/
-          build/lib/
-          build/include/
-        retention-days: 90
+#     - name: Upload MuJoCo artifacts
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: mujoco-${{ matrix.label }}
+#         path: |
+#           build/bin/
+#           build/lib/
+#           build/include/
+#         retention-days: 90

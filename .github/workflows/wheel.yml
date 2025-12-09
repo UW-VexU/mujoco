@@ -1,0 +1,49 @@
+name: Wheel building
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_wheel:
+    name: Build wheel on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-24.04
+          - macos-13
+          - windows-2025
+    env:
+      MUJOCO_PATH: ${{ github.workspace }}/mujoco
+      MUJOCO_PLUGIN_PATH: ${{ github.workspace }}/mujoco/plugin
+      UV_PYTHON: "3.14"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: bash ./.github/workflows/helper.sh install_deps
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Prepare MuJoCo build
+        run: bash ./.github/workflows/helper.sh prepare_build
+
+      - name: Compile MuJoCo
+        run: bash ./.github/workflows/helper.sh build_mujoco
+
+      - name: Build mujoco python wheel
+        run: bash ./.github/workflows/helper.sh build_wheel
+
+      - name: Upload Python wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-wheels-${{ matrix.os }}
+          path: mujoco/python/dist/*.whl
+          retention-days: 14
