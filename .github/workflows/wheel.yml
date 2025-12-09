@@ -13,9 +13,10 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-24.04
+          - ubuntu-22.04
+          - ubuntu-latest
           - macos-latest
-          - windows-2025
+          - windows-latest
     env:
       MUJOCO_PATH: ${{ github.workspace }}
       MUJOCO_PLUGIN_PATH: ${{ github.workspace }}/plugin

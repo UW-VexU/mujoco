@@ -32,12 +32,24 @@ install_deps() {
 
 prepare_build() {
     mkdir -p build
-    cd build &&
-    cmake .. \
-        -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON \
-        -DMUJOCO_BUILD_EXAMPLES:BOOL=OFF \
-        -DCMAKE_INSTALL_PREFIX:PATH="${GITHUB_WORKSPACE}/install"
+
+    COMMON_FLAGS=(
+        -DCMAKE_BUILD_TYPE:STRING=Release
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON
+        -DMUJOCO_BUILD_EXAMPLES:BOOL=OFF
+        -DCMAKE_INSTALL_RPATH:STRING="@loader_path"
+        -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON
+    )
+
+    if [[ "$RUNNER_OS" == "Windows" ]]; then
+        cmake .. \
+            -GNinja \
+            -DCMAKE_C_COMPILER:STRING=clang \
+            -DCMAKE_CXX_COMPILER:STRING=clang++ \
+            "${COMMON_FLAGS[@]}"
+    else
+        cmake .. "${COMMON_FLAGS[@]}"
+    fi
 }
 
 build_mujoco() {
