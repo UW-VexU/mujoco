@@ -36,7 +36,8 @@ prepare_build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON \
-        -DMUJOCO_BUILD_EXAMPLES:BOOL=OFF
+        -DMUJOCO_BUILD_EXAMPLES:BOOL=OFF \
+        -DCMAKE_INSTALL_PREFIX:PATH="${GITHUB_WORKSPACE}/install"
 }
 
 build_mujoco() {
@@ -46,15 +47,14 @@ build_mujoco() {
 }
 
 build_wheel_and_sdist() {
-    cd python &&
-    
-    export MUJOCO_LIBRARY_DIR="${GITHUB_WORKSPACE}/build/lib" &&
-    export MUJOCO_INCLUDE_DIR="${GITHUB_WORKSPACE}/include" &&
-    
+    export MUJOCO_LIBRARY_DIR="${GITHUB_WORKSPACE}/install/lib"
+    export MUJOCO_INCLUDE_DIR="${GITHUB_WORKSPACE}/install/include"
+
     if [[ "$RUNNER_OS" == "Windows" ]]; then
-        export MUJOCO_LIBRARY_DIR="${GITHUB_WORKSPACE}/build/bin/Release"
-    fi &&
-    
+        export MUJOCO_LIBRARY_DIR="${GITHUB_WORKSPACE}/install/bin"
+    fi
+
+    cd python &&
     uv venv .venv &&
     if [[ "$RUNNER_OS" == "Windows" ]]; then
         source .venv/Scripts/activate
