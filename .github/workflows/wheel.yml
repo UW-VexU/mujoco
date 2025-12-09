@@ -17,8 +17,8 @@ jobs:
           - macos-latest
           - windows-2025
     env:
-      MUJOCO_PATH: ${{ github.workspace }}/mujoco
-      MUJOCO_PLUGIN_PATH: ${{ github.workspace }}/mujoco/plugin
+      MUJOCO_PATH: ${{ github.workspace }}
+      MUJOCO_PLUGIN_PATH: ${{ github.workspace }}/plugin
       UV_PYTHON: "3.14"
     steps:
       - name: Checkout
@@ -41,9 +41,9 @@ jobs:
       - name: Build mujoco python wheel
         run: bash ./.github/workflows/helper.sh build_wheel_and_sdist
 
-      - name: Upload Python wheels
+      - name: Upload Python wheels and sdists
         uses: actions/upload-artifact@v4
         with:
           name: python-wheels-${{ matrix.os }}
-          path: python/dist/*.whl
+          path: python/dist/*
           retention-days: 14
