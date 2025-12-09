@@ -44,7 +44,7 @@ build_mujoco() {
 }
 
 build_wheel_and_sdist() {
-    cd mujoco/python &&
+    cd python &&
     uv venv .venv &&
     if [[ "$RUNNER_OS" == "Windows" ]]; then
         source .venv/Scripts/activate

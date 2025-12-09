@@ -39,7 +39,7 @@ jobs:
         run: bash ./.github/workflows/helper.sh build_mujoco
 
       - name: Build mujoco python wheel
-        run: bash ./.github/workflows/helper.sh build_wheel
+        run: bash ./.github/workflows/helper.sh build_wheel_and_sdist
 
       - name: Upload Python wheels
         uses: actions/upload-artifact@v4
