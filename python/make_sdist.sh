@@ -58,7 +58,6 @@ cp "${package_dir}"/../cmake/*.cmake mujoco/cmake
 # Copy over Simulate source code.
 cp -r "${package_dir}"/../simulate mujoco
 
-python -m build . --wheel
 python -m build . --sdist
 tar -tf dist/mujoco-*.tar.gz
 popd
