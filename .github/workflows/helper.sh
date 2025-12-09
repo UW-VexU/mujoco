@@ -13,7 +13,7 @@ install_deps_linux() {
 }
 
 install_deps_windows() {
-    true
+    choco install llvm ninja -y
 }
 
 install_deps_macos() {
@@ -41,6 +41,7 @@ prepare_build() {
         -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON
     )
 
+    cd build &&
     if [[ "$RUNNER_OS" == "Windows" ]]; then
         cmake .. \
             -GNinja \
@@ -54,17 +55,13 @@ prepare_build() {
 
 build_mujoco() {
     cd build && 
-    cmake --build . --config=Release &&
-    cmake --install . --config=Release
+    cmake --build . --config=Release
 }
 
 build_wheel_and_sdist() {
-    export MUJOCO_LIBRARY_DIR="${GITHUB_WORKSPACE}/install/lib"
-    export MUJOCO_INCLUDE_DIR="${GITHUB_WORKSPACE}/install/include"
-
     if [[ "$RUNNER_OS" == "Windows" ]]; then
-        export MUJOCO_LIBRARY_DIR="${GITHUB_WORKSPACE}/install/bin"
-    fi
+        export MUJOCO_CMAKE_ARGS="-GNinja -DCMAKE_C_COMPILER:STRING=clang -DCMAKE_CXX_COMPILER:STRING=clang++"
+    fi &&
 
     cd python &&
     uv venv .venv &&
