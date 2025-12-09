@@ -16,7 +16,7 @@ jobs:
           - ubuntu-22.04
           - ubuntu-latest
           - macos-latest
-          - macos-13 # macos-13 is x86_64, macos-latest is arm64
+          - macos-15-intel
           - windows-latest
     env:
       MUJOCO_PATH: ${{ github.workspace }}
