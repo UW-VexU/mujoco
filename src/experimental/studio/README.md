@@ -14,8 +14,8 @@ directory. Then follow the printed instructions to run the executable.
 bash build.sh
 ```
 
-> [!NOTE] For now [`build.sh`](build.sh) script works on windows in a git bash
-> shell.
+> [!NOTE]
+> For now [`build.sh`](build.sh) script works on windows in a git bash shell.
 
 ## Development
 
@@ -43,12 +43,6 @@ the `-DMUJOCO_USE_FILAMENT_VULKAN=ON` option.
 
 Also note that you will need to run the application from the folder containing
 the executable so that the expected materials/assets can be found.
-
-> [!WARNING] Filament rendering currently supported on Linux. We are actively
-> working on bugs and build issues we've encountered on MacOS and Windows.
-> Contributions improving support on those platforms are very welcome, your
-> fixes may need to be applied in the upstream [Filament](https://github.com/google/filament)
-> GitHub repository.
 
 ## Known Bugs
 

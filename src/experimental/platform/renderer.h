@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MUJOCO_SRC_EXPERIMENTAL_TOOLBOX_RENDERER_H_
-#define MUJOCO_SRC_EXPERIMENTAL_TOOLBOX_RENDERER_H_
+#ifndef MUJOCO_SRC_EXPERIMENTAL_PLATFORM_RENDERER_H_
+#define MUJOCO_SRC_EXPERIMENTAL_PLATFORM_RENDERER_H_
 
 #include <chrono>
 #include <cstdint>
@@ -22,7 +22,7 @@
 
 #include <mujoco/mujoco.h>
 
-namespace mujoco::toolbox {
+namespace mujoco::platform {
 
 // Renders the mujoco simulation and the imgui state into the active window
 // using the filament rendering backend.
@@ -52,15 +52,12 @@ class Renderer {
   void SaveScreenshot(const std::string& filename, int width, int height);
 
   // Rendering flags.
-  mjtByte GetFlag(mjtRndFlag flag) const { return scene_.flags[flag];}
-  void SetFlag(mjtRndFlag flag, mjtByte value) { scene_.flags[flag] = value; }
+  mjtByte* GetRenderFlags() { return scene_.flags; }
 
-  // Returns the current, average frame rate.
-  double GetFrameRate() const { return fps_; }
+  // Returns the render context.
+  const mjrContext& GetContext() const { return render_context_; }
 
  private:
-  using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
-
   // Resets the renderer; no rendering will occur until Init() is called again.
   void Deinit();
 
@@ -68,12 +65,8 @@ class Renderer {
   mjrContext render_context_;
   mjvScene scene_;
   bool initialized_ = false;
-
-  int frames_ = 0;
-  TimePoint last_fps_update_;
-  double fps_ = 0;
 };
 
-}  // namespace mujoco::toolbox
+}  // namespace mujoco::platform
 
-#endif  // MUJOCO_SRC_EXPERIMENTAL_TOOLBOX_RENDERER_H_
+#endif  // MUJOCO_SRC_EXPERIMENTAL_PLATFORM_RENDERER_H_

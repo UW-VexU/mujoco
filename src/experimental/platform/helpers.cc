@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "experimental/toolbox/helpers.h"
+#include "experimental/platform/helpers.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -30,40 +30,8 @@
 #include <mujoco/mjxmacro.h>
 #include <mujoco/mujoco.h>
 #include "engine/engine_vis_visualize.h"
-#include "xml/xml_api.h"
 
-namespace mujoco::toolbox {
-
-mjModel* LoadMujocoModel(const std::string& model_file, const mjVFS* vfs) {
-  mjModel* model = nullptr;
-
-  if (model_file.empty()) {
-    auto spec = mj_makeSpec();
-    model = mj_compile(spec, 0);
-    mj_deleteSpec(spec);
-  } else if (model_file.ends_with(".mjb")) {
-    model = mj_loadModel(model_file.c_str(), 0);
-    if (!model) {
-      return nullptr;
-    }
-  } else if (model_file.ends_with(".xml")) {
-    char error[1000] = "";
-    model = mj_loadXML(model_file.c_str(), vfs, error, sizeof(error));
-    if (!model) {
-      return nullptr;
-    }
-  } else {
-    char error[1000] = "";
-    auto spec =
-        mj_parseXMLString(model_file.c_str(), nullptr, error, sizeof(error));
-    if (!spec) {
-      return nullptr;
-    }
-    model = mj_compile(spec, 0);
-    mj_deleteSpec(spec);
-  }
-  return model;
-}
+namespace mujoco::platform {
 
 void SaveText(const std::string& contents, const std::string& filename) {
   std::ofstream file(filename);
@@ -219,4 +187,4 @@ std::string KeyframeToString(const mjModel* model, const mjData* data,
   return str;
 }
 
-}  // namespace mujoco::toolbox
+}  // namespace mujoco::platform

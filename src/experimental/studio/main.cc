@@ -26,7 +26,7 @@
 #include "experimental/studio/app.h"
 
 ABSL_FLAG(int, window_width, 1400, "Window width");
-ABSL_FLAG(int, window_height, 700, "Window height");
+ABSL_FLAG(int, window_height, 720, "Window height");
 ABSL_FLAG(std::string, model_file, "", "MuJoCo model file.");
 
 static std::vector<std::byte> LoadAsset(std::string_view path) {
@@ -46,9 +46,11 @@ static std::vector<std::byte> LoadAsset(std::string_view path) {
 
 int main(int argc, char** argv, char** envp) {
 
+  const char* home = getenv("HOME");
+  const std::string ini_path = std::string(home ? home : ".") + "/.mujoco.ini";
+
   const int width = absl::GetFlag(FLAGS_window_width);
   const int height = absl::GetFlag(FLAGS_window_height);
-  const std::string ini_path = std::string(getenv("HOME")) + "/.mujoco.ini";
   mujoco::studio::App app(width, height, ini_path, LoadAsset);
 
   // If the model file is not specified, try to load it from the first argument

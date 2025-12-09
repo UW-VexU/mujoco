@@ -91,7 +91,7 @@ MJWarp is optimized for parallel simulation. A batch of simulations can be speci
 - _`nconmax`: Expected number of contacts per world. The maximum number of contacts for all worlds is
   ``nconmax * nworld``.
 - _`naconmax`: Alternative to `nconmax`_, maximum number of contacts over all worlds. If `nconmax`_ and `naconmax`_ are
-  both set and ``nworld * nconmax != naconmax`` an error will be raised.
+  both set then `nconmax`_ is ignored.
 - _`njmax`: Maximum number of constraints per world.
 
 .. admonition:: Semantic difference for `nconmax`_ and `njmax`_.
@@ -256,7 +256,7 @@ Solver iterations
 MuJoCo's default solver settings for the maximum numbers of :ref:`solver iterations<option-iterations>` and
 :ref:`linesearch iterations<option-ls_iterations>` are expected to provide reasonable performance. Reducing MJWarp's
 settings :attr:`Option.iterations <mujoco_warp.Option.iterations>` and/or
-:attr:`Optiona.ls_iterations <mujoco_warp.Option.ls_iterations>` limits may improve performance and should be secondary
+:attr:`Option.ls_iterations <mujoco_warp.Option.ls_iterations>` limits may improve performance and should be secondary
 considerations after tuning `nconmax`_ / `naconmax`_ and `njmax`_.
 
 Reducing these limits too much may prevent the constraint solver from converging and can lead to inaccurate or unstable
@@ -276,6 +276,15 @@ Scenes that include :ref:`contact sensors<sensor-contact>` have a parameter that
 contacts per sensor :attr:`Option.contact_sensor_max_match <mujoco_warp.Option.contact_sensor_max_match>`. For best
 performance, the value of this parameter should be as small as possible while ensuring the simulation does not exceed
 the limit. Matched contacts that exceed this limit will be ignored.
+
+The value of this parameter can be set directly, for example ``model.opt.contact_sensor_maxmatch = 16``, or via an XML
+custom numeric field
+
+.. code-block:: xml
+
+   <custom>
+     <numeric name="contact_sensor_maxmatch" data="16"/>
+   </custom>
 
 Similar to the maximum numbers of contacts and constraints, a good value for this setting is expected to be environment
 specific. :func:`mjwarp-testspeed <mujoco_warp.testspeed>` and :func:`mjwarp-viewer <mujoco_warp.viewer>` may be useful
@@ -341,3 +350,120 @@ It is possible to override the field shape and set the field values after graph 
    :class: note
 
    Heterogeneous worlds, for example: per-world meshes or number of degrees of freedom, are not currently available.
+
+.. _mjwFAQ:
+
+Frequently Asked Questions
+==========================
+
+Learning frameworks
+-------------------
+
+**Does MJWarp work with JAX?**
+
+Yes. MJWarp is interoperable with `JAX <https://jax.readthedocs.io/>`__. Please see the
+`Warp Interoperability <https://nvidia.github.io/warp/modules/interoperability.html#jax>`__ documentation for details.
+
+Additionally, :ref:`MJX <mjx>` provides a JAX API for a subset of MJWarp's :doc:`API <api>`. The backend is
+specified with ``impl='warp'``.
+
+**Does MJWarp work with PyTorch?**
+
+Yes. MJWarp is interoperable with `PyTorch <https://pytorch.org>`__. Please see the
+`Warp Interoperability <https://nvidia.github.io/warp/modules/interoperability.html#pytorch>`__ documentation for
+details.
+
+**How to train policies with MJWarp physics?**
+
+For examples that train policies with MJWarp physics, please see:
+
+- `Isaac Lab <https://github.com/isaac-sim/IsaacLab/tree/feature/newton>`__: Train via
+  `Newton API <https://github.com/newton-physics/newton>`__.
+- `mjlab <https://github.com/mujocolab/mjlab>`__: Train directly with MJWarp using PyTorch.
+- `MuJoCo Playground <https://github.com/google-deepmind/mujoco_playground>`__: Train via :ref:`MJX API <mjx>`.
+
+Features
+--------
+
+**Is MJWarp differentiable?**
+
+No. MJWarp is not currently differentiable via
+Warp's `automatic differentiation <https://nvidia.github.io/warp/modules/differentiability.html#differentiability>`__
+functionality. Updates from the team related to enabling automatic differentiation for MJWarp are tracked in this
+`GitHub issue <https://github.com/google-deepmind/mujoco_warp/issues/500>`__.
+
+**Does MJWarp work with multiple GPUs?**
+
+Yes. Warp's ``wp.ScopedDevice`` enables multi-GPU computation
+
+.. code-block:: python
+
+   # create a graph for each device
+   graph = {}
+   for device in wp.get_cuda_devices():
+     with wp.ScopedDevice(device):
+       m = mjw.put_model(mjm)
+       d = mjw.make_data(mjm)
+       with wp.ScopedCapture(device) as capture:
+         mjw.step(m, d)
+       graph[device] = capture.graph
+
+   # launch a graph on each device
+   for device in wp.get_cuda_devices():
+     wp.capture_launch(graph[device])
+
+Please see the
+`Warp documentation <https://nvidia.github.io/modules/devices.html#example-using-wp-scopeddevice-with-multiple-gpus>`__
+for details and
+`mjlab distributed training <https://github.com/mujocolab/mjlab/tree/main/docs/api/distributed_training.md>`__ for a
+reinforcement learning example.
+
+**Is MJWarp on GPU deterministic?**
+
+No. There may be ordering or *small* numerical differences between results computed by different executions of the same
+code. This is characteristic of non-deterministic atomic operations on GPU. Set device to CPU with
+``wp.set_device("cpu")`` for deterministic results.
+
+Developments for deterministic results on GPU are tracked in this
+`GitHub issue <https://github.com/google-deepmind/mujoco_warp/issues/562>`__.
+
+**How are orientations represented?**
+
+Orientations are represented as unit quaternions and follow :ref:`MuJoCo's conventions<siLayout>`:
+``w, x, y, z`` or ``scalar, vector``.
+
+.. admonition:: ``wp.quaternion``
+  :class: note
+
+  MJWarp utilizes Warp's `built-in type <https://nvidia.github.io/warp/modules/functions.html#warp.quaternion>`__
+  ``wp.quaternion``. Importantly however, MJWarp does not utilize Warp's ``x, y, z, w`` quaternion convention or
+  operations and instead implements quaternion routines that follow MuJoCo's conventions. Please see
+  `math.py <https://github.com/google-deepmind/mujoco_warp/blob/main/mujoco_warp/_src/math.py>`__ for the
+  implementations.
+
+Compilation
+-----------
+
+**How can compilation time be improved?**
+
+Limit the number of unique colliders that require the general convex collision pipeline. These colliders are listed as
+``_CONVEX_COLLISION_PAIRS`` in
+`collision_convex.py <https://github.com/google-deepmind/mujoco_warp/blob/main/mujoco_warp/_src/collision_convex.py>`__.
+Improvements to the compilation time for the pipeline are tracked in this
+`GitHub issue <https://github.com/google-deepmind/mujoco_warp/issues/813>`__.
+
+**Why are the physics not working as expected after upgrading MJWarp?**
+
+The Warp cache may be incompatible with the current code and should be cleared as part of the debugging process. This
+can be accomplished by deleting the directory ``~/.cache/warp`` or via Python
+
+.. code-block:: python
+
+   import warp as wp
+   wp.clear_kernel_cache()
+
+**Is it possible to compile MJWarp ahead of time instead of at runtime?**
+
+Yes. Please see Warp's
+`Ahead-of-Time Compilation Workflows <https://nvidia.github.io/warp/codegen.html#ahead-of-time-compilation-workflows>`__
+documentation for details.

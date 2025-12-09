@@ -1498,6 +1498,26 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
          ),
          doc='Print scene to text file, specifying format. float_format must be a valid printf-style format string for a single float value.',  # pylint: disable=line-too-long
      )),
+    ('mj_fwdKinematics',
+     FunctionDecl(
+         name='mj_fwdKinematics',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='m',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjModel', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='d',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjData'),
+                 ),
+             ),
+         ),
+         doc='Run all kinematics-like computations (kinematics, comPos, camlight, flex, tendon).',  # pylint: disable=line-too-long
+     )),
     ('mj_fwdPosition',
      FunctionDecl(
          name='mj_fwdPosition',
@@ -2519,6 +2539,36 @@ FUNCTIONS: Mapping[str, FunctionDecl] = dict([
              ),
          ),
          doc='Set state.',
+     )),
+    ('mj_copyState',
+     FunctionDecl(
+         name='mj_copyState',
+         return_type=ValueType(name='void'),
+         parameters=(
+             FunctionParameterDecl(
+                 name='m',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjModel', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='src',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjData', is_const=True),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='dst',
+                 type=PointerType(
+                     inner_type=ValueType(name='mjData'),
+                 ),
+             ),
+             FunctionParameterDecl(
+                 name='sig',
+                 type=ValueType(name='unsigned int'),
+             ),
+         ),
+         doc='Copy state from src to dst.',
      )),
     ('mj_setKeyframe',
      FunctionDecl(

@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MUJOCO_SRC_EXPERIMENTAL_TOOLBOX_STEP_CONTROL_H_
-#define MUJOCO_SRC_EXPERIMENTAL_TOOLBOX_STEP_CONTROL_H_
+#ifndef MUJOCO_SRC_EXPERIMENTAL_PLATFORM_STEP_CONTROL_H_
+#define MUJOCO_SRC_EXPERIMENTAL_PLATFORM_STEP_CONTROL_H_
 
 #include <chrono>
 #include <string>
 
 #include <mujoco/mujoco.h>
 
-namespace mujoco::toolbox {
+namespace mujoco::platform {
 
 using Seconds = std::chrono::duration<double>;
 using Clock = std::chrono::steady_clock;
@@ -28,8 +28,13 @@ using Clock = std::chrono::steady_clock;
 // State and logic for physics synchronization and stepping.
 class StepControl {
  public:
+  StepControl();
+
   enum class Status {
     kOk,
+
+    // Simulation was not stepped because it is paused.
+    kPaused,
 
     // Simulation diverged with autoreset enabled.
     kAutoReset,
@@ -57,6 +62,18 @@ class StepControl {
   // Gets/sets the control noise parameters applied before stepping.
   void GetNoiseParameters(float& noise_scale, float& noise_rate) const;
   void SetNoiseParameters(float noise_scale, float noise_rate);
+
+  // Returns true if the simulation is paused.
+  bool IsPaused() { return paused_; }
+
+  // Pauses/unpauses the simulation.
+  void Pause() { paused_ = true; }
+  void Unpause() { paused_ = false; }
+  void TogglePause() { paused_ = !paused_; }
+
+  // If the simulation is paused, will perform a single step on the next
+  // Advance() call.
+  void RequestSingleStep() { single_step_ = true; }
 
  private:
   std::string AdvanceOneStep(const mjModel* m, mjData* d);
@@ -86,8 +103,20 @@ class StepControl {
 
   // Maximum mis-alignment before re-sync (simulation seconds)
   double sync_misalign_ = .1;
+
+  // Whether or not the simulation is paused.
+  bool paused_ = false;
+
+  // Perform only a single step on the next call to Advance() if the simulation
+  // is paused.
+  bool single_step_ = false;
+
+  // If true and paused, d->qacc_warmstart is set to d->qacc after mj_forward
+  // which has the effect of making the constraint solver eventually converge
+  // while the simulation is paused.
+  bool pause_update_ = false;
 };
 
-}  // namespace mujoco::toolbox
+}  // namespace mujoco::platform
 
-#endif  // MUJOCO_SRC_EXPERIMENTAL_TOOLBOX_STEP_CONTROL_H_
+#endif  // MUJOCO_SRC_EXPERIMENTAL_PLATFORM_STEP_CONTROL_H_

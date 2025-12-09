@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "experimental/toolbox/renderer.h"
+#include "experimental/platform/renderer.h"
 
 #include <chrono>
 #include <string>
 
-#include "experimental/toolbox/helpers.h"
+#include "experimental/platform/helpers.h"
 #include <mujoco/mujoco.h>
 
-namespace mujoco::toolbox {
+namespace mujoco::platform {
 
 Renderer::Renderer(MakeContextFn make_context_fn)
     : make_context_fn_(make_context_fn) {
@@ -57,17 +57,6 @@ void Renderer::Render(const mjModel* model, mjData* data,
 
   mjrRect main_viewport = {0, 0, width, height};
   mjr_render(main_viewport, data ? &scene_ : nullptr, &render_context_);
-
-  auto now = std::chrono::steady_clock::now();
-  auto delta_time = now - last_fps_update_;
-  const double interval = std::chrono::duration<double>(delta_time).count();
-
-  ++frames_;
-  if (interval > 0.2) {  // only update FPS stat at most 5 times per second
-    last_fps_update_ = now;
-    fps_ = frames_ / interval;
-    frames_ = 0;
-  }
 }
 
 void Renderer::SaveScreenshot(const std::string& filename, int width,
@@ -75,4 +64,4 @@ void Renderer::SaveScreenshot(const std::string& filename, int width,
   SaveScreenshotToWebp(width, height, &render_context_, filename);
 }
 
-}  // namespace mujoco::toolbox
+}  // namespace mujoco::platform

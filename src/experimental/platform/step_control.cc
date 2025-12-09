@@ -12,13 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "experimental/toolbox/step_control.h"
+#include "experimental/platform/step_control.h"
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
+#include <ratio>
 #include <mujoco/mujoco.h>
 
-namespace mujoco::toolbox {
+namespace mujoco::platform {
+
+static mjtNum Timer() {
+  using Clock = std::chrono::steady_clock;
+  using Milliseconds = std::chrono::duration<double, std::milli>;
+  static Clock::time_point start = Clock::now();
+  return Milliseconds(Clock::now() - start).count();
+}
+
+StepControl::StepControl() {
+  mjcb_time = Timer;
+}
 
 float StepControl::GetSpeedMeasured() const {
   return speed_measured_;
@@ -50,6 +62,24 @@ void StepControl::SetNoiseParameters(float ctrl_noise_scale,
 StepControl::Status StepControl::Advance(const mjModel* m, mjData* d) {
   if (!m) {
     return Status::kOk;
+  }
+
+  if (paused_) {
+    // When we eventually unpause, we need to make sure we sync to immediately
+    // and step once. Without this we could step many times before rendering
+    // resulting in a noticeable delay before the simulation restarts
+    // (especially for large slowdowns).
+    force_sync_ = true;
+
+    if (!single_step_) {
+      // Run mj_forward to update rendering and joint sliders.
+      mj_forward(m, d);
+      if (pause_update_) {
+        mju_copy(d->qacc_warmstart, d->qacc, m->nv);
+      }
+      return Status::kPaused;
+    }
+    single_step_ = false;
   }
 
   const Clock::time_point start_cpu = Clock::now();
@@ -119,8 +149,9 @@ StepControl::Status StepControl::Advance(const mjModel* m, mjData* d) {
 
     if (mjDISABLED(mjDSBL_AUTORESET)) {
       for (mjtWarning w : kDivergedWarnings) {
-        // Stop stepping if the simulation diverged.
         if (d->warning[w].number > 0) {
+          // Stop stepping if the simulation diverged.
+          paused_ = true;
           return Status::kDiverged;
         }
       }
@@ -175,4 +206,4 @@ void StepControl::InjectNoise(const mjModel* m, mjData* d) {
   }
 }
 
-}  // namespace mujoco::toolbox
+}  // namespace mujoco::platform

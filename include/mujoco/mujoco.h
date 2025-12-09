@@ -16,7 +16,7 @@
 #define MUJOCO_MUJOCO_H_
 
 // header version; should match the library version as returned by mj_version()
-#define mjVERSION_HEADER 338
+#define mjVERSION_HEADER 341
 
 // needed to define size_t, fabs and log10
 #include <stdlib.h>
@@ -328,6 +328,9 @@ MJAPI void mj_printFormattedScene(const mjvScene* s, const char* filename,
 
 //---------------------------------- Components ----------------------------------------------------
 
+// Run all kinematics-like computations (kinematics, comPos, camlight, flex, tendon).
+MJAPI void mj_fwdKinematics(const mjModel* m, mjData* d);
+
 // Run position-dependent computations.
 MJAPI void mj_fwdPosition(const mjModel* m, mjData* d);
 
@@ -476,6 +479,9 @@ MJAPI void mj_extractState(const mjModel* m, const mjtNum* src, unsigned int src
 
 // Set state.
 MJAPI void mj_setState(const mjModel* m, mjData* d, const mjtNum* state, unsigned int sig);
+
+// Copy state from src to dst.
+MJAPI void mj_copyState(const mjModel* m, const mjData* src, mjData* dst, unsigned int sig);
 
 // Copy current state to the k-th model keyframe.
 MJAPI void mj_setKeyframe(mjModel* m, const mjData* d, int k);

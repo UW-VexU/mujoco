@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "experimental/toolbox/sim_profiler.h"
+#include "experimental/platform/sim_profiler.h"
 
 #include <mujoco/mujoco.h>
 #include <imgui.h>
 #include <implot.h>
 
-namespace mujoco::toolbox {
+namespace mujoco::platform {
 
 SimProfiler::SimProfiler() {
   Clear();
@@ -118,9 +118,8 @@ void SimProfiler::Update(const mjModel* model, const mjData* data) {
 }
 
 
-void SimProfiler::Gui() {
-  const int plot_flags = 0;
-  if (ImPlot::BeginPlot("CPU Time", ImVec2(-1, 0), plot_flags)) {
+void SimProfiler::CpuTimeGraph() {
+  if (ImPlot::BeginPlot("CPU Time", ImVec2(-1, 0))) {
     ImPlot::SetupAxis(ImAxis_X1, "frame", ImPlotAxisFlags_AutoFit);
     ImPlot::SetupAxis(ImAxis_Y1, "msec", ImPlotAxisFlags_AutoFit);
     ImPlot::SetupAxisFormat(ImAxis_Y1, "%.2f");
@@ -139,8 +138,10 @@ void SimProfiler::Gui() {
                      -(int)cpu_other_.size());
     ImPlot::EndPlot();
   }
+}
 
-  if (ImPlot::BeginPlot("Dimensions", ImVec2(-1, 0), plot_flags)) {
+void SimProfiler::DimensionsGraph() {
+  if (ImPlot::BeginPlot("Dimensions", ImVec2(-1, 0))) {
     ImPlot::SetupAxis(ImAxis_X1, "frame", ImPlotAxisFlags_AutoFit);
     ImPlot::SetupAxis(ImAxis_Y1, "count", ImPlotAxisFlags_AutoFit);
     ImPlot::SetupAxisFormat(ImAxis_Y1, "%.0f");
@@ -163,4 +164,4 @@ void SimProfiler::Gui() {
   }
 }
 
-}  // namespace mujoco::toolbox
+}  // namespace mujoco::platform

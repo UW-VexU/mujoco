@@ -112,7 +112,7 @@ public const int mjMAXLINEPNT = 1001;
 public const int mjMAXPLANEGRID = 200;
 public const bool THIRD_PARTY_MUJOCO_MJXMACRO_H_ = true;
 public const bool THIRD_PARTY_MUJOCO_MUJOCO_H_ = true;
-public const int mjVERSION_HEADER = 338;
+public const int mjVERSION_HEADER = 341;
 
 
 // ------------------------------------Enums------------------------------------
@@ -6523,6 +6523,9 @@ public static unsafe extern void mj_printScene(mjvScene_* s, [MarshalAs(Unmanage
 public static unsafe extern void mj_printFormattedScene(mjvScene_* s, [MarshalAs(UnmanagedType.LPStr)]string filename, [MarshalAs(UnmanagedType.LPStr)]string float_format);
 
 [DllImport("mujoco", CallingConvention = CallingConvention.Cdecl)]
+public static unsafe extern void mj_fwdKinematics(mjModel_* m, mjData_* d);
+
+[DllImport("mujoco", CallingConvention = CallingConvention.Cdecl)]
 public static unsafe extern void mj_fwdPosition(mjModel_* m, mjData_* d);
 
 [DllImport("mujoco", CallingConvention = CallingConvention.Cdecl)]
@@ -6659,6 +6662,9 @@ public static unsafe extern void mj_extractState(mjModel_* m, double* src, uint 
 
 [DllImport("mujoco", CallingConvention = CallingConvention.Cdecl)]
 public static unsafe extern void mj_setState(mjModel_* m, mjData_* d, double* state, uint sig);
+
+[DllImport("mujoco", CallingConvention = CallingConvention.Cdecl)]
+public static unsafe extern void mj_copyState(mjModel_* m, mjData_* src, mjData_* dst, uint sig);
 
 [DllImport("mujoco", CallingConvention = CallingConvention.Cdecl)]
 public static unsafe extern void mj_setKeyframe(mjModel_* m, mjData_* d, int k);
