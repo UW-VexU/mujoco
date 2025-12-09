@@ -13,6 +13,12 @@
 name: build
 
 on:
+  workflow_dispatch:
+    inputs:
+      example_input:
+        description: 'An example input for the workflow dispatch'
+        required: false
+        default: 'default value'
   push:
     paths-ignore:
       - "doc/**"
