@@ -31,8 +31,8 @@ install_deps() {
 }
 
 prepare_build() {
-    mkdir -p mujoco/build
-    cd mujoco/build &&
+    mkdir -p build
+    cd build &&
     cmake .. \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON \
@@ -40,7 +40,7 @@ prepare_build() {
 }
 
 build_mujoco() {
-    cd mujoco/build && cmake --build . --config=Release
+    cd build && cmake --build . --config=Release
 }
 
 build_wheel_and_sdist() {

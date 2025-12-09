@@ -14,7 +14,7 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04
-          - macos-13
+          - macos-latest
           - windows-2025
     env:
       MUJOCO_PATH: ${{ github.workspace }}/mujoco
@@ -45,5 +45,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: python-wheels-${{ matrix.os }}
-          path: mujoco/python/dist/*.whl
+          path: python/dist/*.whl
           retention-days: 14
