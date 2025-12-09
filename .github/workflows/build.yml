@@ -43,38 +43,6 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--no-as-needed
             tmpdir: "/tmp"
           - os: ubuntu-24.04
-            label: "ubuntu-24.04-gcc-13"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=gcc-13
-              -DCMAKE_CXX_COMPILER:STRING=g++-13
-              -DCMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--no-as-needed
-            tmpdir: "/tmp"
-          - os: ubuntu-22.04
-            label: "ubuntu-22.04-gcc-12"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=gcc-12
-              -DCMAKE_CXX_COMPILER:STRING=g++-12
-              -DCMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--no-as-needed
-            tmpdir: "/tmp"
-          - os: ubuntu-22.04
-            label: "ubuntu-22.04-gcc-11"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=gcc-11
-              -DCMAKE_CXX_COMPILER:STRING=g++-11
-              -DCMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--no-as-needed
-            tmpdir: "/tmp"
-          - os: ubuntu-22.04
-            label: "ubuntu-22.04-gcc-10"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=gcc-10
-              -DCMAKE_CXX_COMPILER:STRING=g++-10
-              -DCMAKE_EXE_LINKER_FLAGS:STRING=-Wl,--no-as-needed
-            tmpdir: "/tmp"
-          - os: ubuntu-24.04
             label: "ubuntu-24.04-clang-18"
             cmake_args: >-
               -G Ninja
@@ -82,54 +50,8 @@ jobs:
               -DCMAKE_CXX_COMPILER:STRING=clang++-18
               -DMUJOCO_HARDEN:BOOL=ON
             tmpdir: "/tmp"
-          - os: ubuntu-24.04
-            label: "ubuntu-24.04-clang-17"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=clang-17
-              -DCMAKE_CXX_COMPILER:STRING=clang++-17
-              -DMUJOCO_HARDEN:BOOL=ON
-            tmpdir: "/tmp"
-          - os: ubuntu-24.04
-            label: "ubuntu-24.04-clang-16"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=clang-16
-              -DCMAKE_CXX_COMPILER:STRING=clang++-16
-              -DMUJOCO_HARDEN:BOOL=ON
-            tmpdir: "/tmp"
-          - os: ubuntu-22.04
-            label: "ubuntu-22.04-clang-15"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=clang-15
-              -DCMAKE_CXX_COMPILER:STRING=clang++-15
-              -DMUJOCO_HARDEN:BOOL=ON
-            tmpdir: "/tmp"
-          - os: ubuntu-22.04
-            label: "ubuntu-22.04-clang-14"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=clang-14
-              -DCMAKE_CXX_COMPILER:STRING=clang++-14
-              -DMUJOCO_HARDEN:BOOL=ON
-            tmpdir: "/tmp"
-          - os: ubuntu-22.04
-            label: "ubuntu-22.04-clang-13"
-            cmake_args: >-
-              -G Ninja
-              -DCMAKE_C_COMPILER:STRING=clang-13
-              -DCMAKE_CXX_COMPILER:STRING=clang++-13
-              -DMUJOCO_HARDEN:BOOL=ON
-            tmpdir: "/tmp"
           - os: macos-15
             label: "macos-15-arm64"
-            cmake_args: >-
-              -G Ninja
-              -DMUJOCO_HARDEN:BOOL=ON
-            tmpdir: "/tmp"
-          - os: macos-15-large
-            label: "macos-15-x86_64"
             cmake_args: >-
               -G Ninja
               -DMUJOCO_HARDEN:BOOL=ON
@@ -157,7 +79,7 @@ jobs:
 
     - uses: actions/setup-python@v4
       with:
-        python-version: "3.11"
+        python-version: "3.14"
 
     - name: Prepare Python
       shell: bash
@@ -227,7 +149,6 @@ jobs:
       run: bash ../.github/workflows/build_steps.sh make_python_sdist
 
     - name: Build Python bindings
-      if: ${{ runner.os != 'Windows' }}
       shell: bash
       working-directory: python/dist
       env:
@@ -237,7 +158,6 @@ jobs:
 
 
     - name: Upload Python wheels
-      if: ${{ runner.os != 'Windows' }}
       uses: actions/upload-artifact@v4
       with:
         name: python-wheels-${{ matrix.label }}

@@ -71,7 +71,7 @@ configure_mujoco() {
     cd build &&
     cmake .. \
         -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=OFF \
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON \
         -DCMAKE_INSTALL_PREFIX:STRING=${TMPDIR}/mujoco_install \
         -DMUJOCO_BUILD_EXAMPLES:BOOL=OFF \
         ${CMAKE_ARGS}
@@ -121,7 +121,7 @@ configure_samples() {
     cd build &&
     cmake .. \
         -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=OFF \
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON \
         -Dmujoco_ROOT:STRING=${TMPDIR}/mujoco_install \
         ${CMAKE_ARGS}
 }
@@ -133,7 +133,7 @@ configure_simulate() {
     cd build &&
     cmake .. \
         -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=OFF \
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON \
         -Dmujoco_ROOT:STRING=${TMPDIR}/mujoco_install \
         ${CMAKE_ARGS}
 }
@@ -150,7 +150,7 @@ _configure_studio() {
     # needed options by running `export _CONFIGURE_STUDIO_CMAKE_ARGS=...` first
     cmake -B build \
         -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=OFF \
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON \
         -DUSE_STATIC_LIBCXX=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DMUJOCO_BUILD_EXAMPLES=OFF \
@@ -190,17 +190,29 @@ build_studio() {
 
 make_python_sdist() {
     echo "Making Python sdist..."
-    source ${TMPDIR}/venv/bin/activate &&
+
+    if [[ $RUNNER_OS == "Windows" ]]; then
+        source ${TMPDIR}/venv/Scripts/activate
+    else
+        source ${TMPDIR}/venv/bin/activate
+    fi
+    
     ./make_sdist.sh
 }
 
 
 build_python_bindings() {
     echo "Building Python bindings..."
-    source ${TMPDIR}/venv/bin/activate &&
+    
+    if [[ $RUNNER_OS == "Windows" ]]; then
+        source ${TMPDIR}/venv/Scripts/activate
+    else
+        source ${TMPDIR}/venv/bin/activate
+    fi
+    
     MUJOCO_PATH="${TMPDIR}/mujoco_install" \
     MUJOCO_PLUGIN_PATH="${TMPDIR}/mujoco_install/mujoco_plugin" \
-    MUJOCO_CMAKE_ARGS="-DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=OFF ${CMAKE_ARGS}" \
+    MUJOCO_CMAKE_ARGS="-DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON ${CMAKE_ARGS}" \
     pip wheel -v --no-deps mujoco-*.tar.gz
 }
 
@@ -224,7 +236,7 @@ build_test_wasm() {
     source emsdk/emsdk_env.sh
     export PATH="$(pwd)/node_modules/.bin:$PATH"
 
-    emcmake cmake -B build_wasm -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=OFF $WASM_CMAKE_ARGS
+    emcmake cmake -B build_wasm -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON $WASM_CMAKE_ARGS
     cmake --build build_wasm
 
     npm run test --prefix ./wasm
