@@ -40,11 +40,21 @@ prepare_build() {
 }
 
 build_mujoco() {
-    cd build && cmake --build . --config=Release
+    cd build && 
+    cmake --build . --config=Release &&
+    cmake --install . --config=Release
 }
 
 build_wheel_and_sdist() {
     cd python &&
+    
+    export MUJOCO_LIBRARY_DIR="${GITHUB_WORKSPACE}/build/lib" &&
+    export MUJOCO_INCLUDE_DIR="${GITHUB_WORKSPACE}/include" &&
+    
+    if [[ "$RUNNER_OS" == "Windows" ]]; then
+        export MUJOCO_LIBRARY_DIR="${GITHUB_WORKSPACE}/build/bin/Release"
+    fi &&
+    
     uv venv .venv &&
     if [[ "$RUNNER_OS" == "Windows" ]]; then
         source .venv/Scripts/activate
